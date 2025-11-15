@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Головоломка с символами - Тайная комната</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Orbitron:wght@400;500&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        * {
+            cursor: none;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Montserrat', serif;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #c0c0c0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Эффект звездного неба */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 4px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 4px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+            z-index: -1;
+        }
+
+        /* Анимированные линии */
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(20, 20, 20, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(20, 20, 20, 0.3) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Кастомный курсор-прицел */
+        .cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+        }
+
+        .cursor::before,
+        .cursor::after {
+            content: '';
+            position: absolute;
+            background: #00ffff;
+            border-radius: 1px;
+        }
+
+        .cursor::before {
+            width: 2px;
+            height: 20px;
+            top: 10px;
+            left: 19px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .cursor::after {
+            width: 20px;
+            height: 2px;
+            top: 19px;
+            left: 10px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .cursor-dot {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: #ff00ff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            box-shadow: 0 0 10px #ff00ff;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: scan 3s linear infinite;
+            opacity: 0.7;
+            z-index: 2;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        /* Контейнер с загадкой */
+        .puzzle-container {
+            width: 90%;
+            max-width: 900px;
+            padding: 30px;
+            background: rgba(10, 10, 10, 0.7);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 0 30px rgba(100, 0, 255, 0.2),
+                        inset 0 0 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+            margin: 20px 0;
+        }
+
+        .puzzle-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff, #00ccff, #33ff99);
+            border-radius: 17px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(5px);
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+            letter-spacing: 2px;
+            font-size: 2.2em;
+            text-align: center;
+        }
+
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -2px 0 #00ffff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(42px, 9999px, 44px, 0); }
+            5% { clip: rect(12px, 9999px, 59px, 0); }
+            10% { clip: rect(48px, 9999px, 29px, 0); }
+            15% { clip: rect(42px, 9999px, 73px, 0); }
+            20% { clip: rect(63px, 9999px, 27px, 0); }
+            25% { clip: rect(34px, 9999px, 55px, 0); }
+            30% { clip: rect(86px, 9999px, 73px, 0); }
+            35% { clip: rect(20px, 9999px, 20px, 0); }
+            40% { clip: rect(26px, 9999px, 60px, 0); }
+            45% { clip: rect(25px, 9999px, 66px, 0); }
+            50% { clip: rect(57px, 9999px, 98px, 0); }
+            55% { clip: rect(5px, 9999px, 46px, 0); }
+            60% { clip: rect(82px, 9999px, 31px, 0); }
+            65% { clip: rect(54px, 9999px, 27px, 0); }
+            70% { clip: rect(28px, 9999px, 99px, 0); }
+            75% { clip: rect(45px, 9999px, 69px, 0); }
+            80% { clip: rect(23px, 9999px, 85px, 0); }
+            85% { clip: rect(54px, 9999px, 84px, 0); }
+            90% { clip: rect(45px, 9999px, 47px, 0); }
+            95% { clip: rect(37px, 9999px, 20px, 0); }
+            100% { clip: rect(4px, 9999px, 91px, 0); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            5% { clip: rect(52px, 9999px, 74px, 0); }
+            10% { clip: rect(79px, 9999px, 85px, 0); }
+            15% { clip: rect(75px, 9999px, 5px, 0); }
+            20% { clip: rect(67px, 9999px, 61px, 0); }
+            25% { clip: rect(14px, 9999px, 79px, 0); }
+            30% { clip: rect(1px, 9999px, 66px, 0); }
+            35% { clip: rect(86px, 9999px, 30px, 0); }
+            40% { clip: rect(23px, 9999px, 98px, 0); }
+            45% { clip: rect(85px, 9999px, 72px, 0); }
+            50% { clip: rect(71px, 9999px, 75px, 0); }
+            55% { clip: rect(2px, 9999px, 48px, 0); }
+            60% { clip: rect(30px, 9999px, 16px, 0); }
+            65% { clip: rect(59px, 9999px, 50px, 0); }
+            70% { clip: rect(41px, 9999px, 62px, 0); }
+            75% { clip: rect(2px, 9999px, 82px, 0); }
+            80% { clip: rect(47px, 9999px, 73px, 0); }
+            85% { clip: rect(3px, 9999px, 27px, 0); }
+            90% { clip: rect(26px, 9999px, 55px, 0); }
+            95% { clip: rect(42px, 9999px, 97px, 0); }
+            100% { clip: rect(38px, 9999px, 49px, 0); }
+        }
+
+        .description {
+            font-family: 'Montserrat', serif;
+            color: #e0e0e0;
+            line-height: 1.7;
+            font-size: 1.1em;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .hint {
+            font-family: 'Special Elite', cursive;
+            color: #888888;
+            font-size: 0.9em;
+            text-align: center;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        /* Область с символами */
+        .symbols-wall {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(20, 20, 30, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(100, 100, 150, 0.3);
+        }
+
+        .symbol {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            background: rgba(10, 10, 20, 0.8);
+            border: 2px solid rgba(100, 100, 255, 0.5);
+            border-radius: 8px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            user-select: none;
+            box-shadow: 0 0 10px rgba(0, 100, 255, 0.2);
+        }
+
+        .symbol:hover {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .symbol.dragging {
+            opacity: 0.7;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.7);
+        }
+
+        /* Область для размещения символов */
+        .slots-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(30, 20, 20, 0.5);
+            border-radius: 10px;
+            border: 1px dashed rgba(255, 100, 100, 0.5);
+            min-height: 100px;
+        }
+
+        .slot {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(30, 10, 10, 0.5);
+            border: 2px dashed rgba(255, 100, 100, 0.5);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .slot.highlight {
+            border-color: #00ffff;
+            background: rgba(0, 50, 50, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .slot.filled {
+            border-style: solid;
+            border-color: #33ff99;
+            background: rgba(0, 50, 30, 0.3);
+        }
+
+        /* Кнопка проверки */
+        .check-button {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1em;
+            background: rgba(0, 30, 50, 0.7);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .check-button:hover {
+            background: rgba(0, 100, 150, 0.7);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+            transform: scale(1.05);
+        }
+
+        .check-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Сообщения */
+        .message {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-family: 'Special Elite', cursive;
+            display: none;
+        }
+
+        .success {
+            background: rgba(0, 50, 0, 0.5);
+            color: #33ff99;
+            border: 1px solid #33ff99;
+            display: block;
+        }
+
+        .error {
+            background: rgba(50, 0, 0, 0.5);
+            color: #ff3333;
+            border: 1px solid #ff3333;
+            display: block;
+        }
+
+        /* Прогресс */
+        .progress-container {
+            width: 100%;
+            height: 5px;
+            background: rgba(50, 50, 50, 0.5);
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        /* Анимация появления символов */
+        @keyframes symbolAppear {
+            0% { opacity: 0; transform: scale(0.5) rotate(-180deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0); }
+        }
+
+        .symbol {
+            animation: symbolAppear 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-lines"></div>
+    <div class="scan-line"></div>
+    
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <div class="puzzle-container">
+        <h1 class="glitch-text" data-text="ГОЛОВОЛОМКА С СИМВОЛАМИ">ГОЛОВОЛОМКА С СИМВОЛАМИ</h1>
+        
+        <div class="description">
+            Перед вами древние символы, найденные на стене тайной комнаты. 
+            Расположите их в правильной последовательности, чтобы раскрыть скрытое послание.
+        </div>
+        
+        <div class="hint">
+            Подсказка: порядок символов соответствует циклическим фазам лунного цикла
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="symbols-wall" id="symbolsContainer">
+            <!-- Символы будут добавлены через JavaScript -->
+        </div>
+        
+        <div class="slots-container" id="slotsContainer">
+            <!-- Слоты для символов будут добавлены через JavaScript -->
+        </div>
+        
+        <button class="check-button" id="checkButton">Проверить последовательность</button>
+        
+        <div class="message success" id="successMessage">
+            Последовательность верна! Секретное послание раскрыто: "Истина скрыта в тени полумесяца"
+        </div>
+        
+        <div class="message error" id="errorMessage">
+            Последовательность неверна. Попробуйте еще раз.
+        </div>
+    </div>
+
+    <script>
+        // Кастомный курсор
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+        });
+
+        // Данные головоломки
+        const symbols = ['☽', '☾', '◐', '◑', '●', '○', '◒', '◓'];
+        const correctOrder = ['○', '◐', '●', '◑', '○', '◒', '●', '◓'];
+        
+        let draggedSymbol = null;
+        let progress = 0;
+        
+        // Инициализация головоломки
+        function initPuzzle() {
+            const symbolsContainer = document.getElementById('symbolsContainer');
+            const slotsContainer = document.getElementById('slotsContainer');
+            
+            // Перемешиваем символы
+            const shuffledSymbols = [...symbols].sort(() => Math.random() - 0.5);
+            
+            // Создаем символы
+            shuffledSymbols.forEach(symbol => {
+                const symbolElement = document.createElement('div');
+                symbolElement.className = 'symbol';
+                symbolElement.textContent = symbol;
+                symbolElement.draggable = true;
+                
+                symbolElement.addEventListener('dragstart', handleDragStart);
+                symbolElement.addEventListener('dragend', handleDragEnd);
+                
+                symbolsContainer.appendChild(symbolElement);
+            });
+            
+            // Создаем слоты для символов
+            for (let i = 0; i < symbols.length; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.dataset.index = i;
+                
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('dragenter', handleDragEnter);
+                slot.addEventListener('dragleave', handleDragLeave);
+                slot.addEventListener('drop', handleDrop);
+                
+                slotsContainer.appendChild(slot);
+            }
+            
+            // Обновляем прогресс
+            updateProgress();
+        }
+        
+        // Обработчики событий перетаскивания
+        function handleDragStart(e) {
+            draggedSymbol = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+        
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.slot').forEach(slot => {
+                slot.classList.remove('highlight');
+            });
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            return false;
+        }
+        
+        function handleDragEnter(e) {
+            this.classList.add('highlight');
+        }
+        
+        function handleDragLeave() {
+            this.classList.remove('highlight');
+        }
+        
+        function handleDrop(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            if (draggedSymbol) {
+                // Если слот уже занят, возвращаем символ на место
+                if (this.firstChild) {
+                    const existingSymbol = this.firstChild;
+                    draggedSymbol.parentNode.appendChild(existingSymbol);
+                }
+                
+                // Помещаем перетаскиваемый символ в слот
+                this.appendChild(draggedSymbol);
+                this.classList.add('filled');
+                this.classList.remove('highlight');
+                
+                // Обновляем прогресс
+                updateProgress();
+                
+                // Скрываем сообщения при изменении последовательности
+                document.getElementById('successMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'none';
+                
+                // Возвращаем обычный вид символам
+                document.querySelectorAll('.symbol').forEach(symbol => {
+                    symbol.style.borderColor = 'rgba(100, 100, 255, 0.5)';
+                    symbol.style.boxShadow = '0 0 10px rgba(0, 100, 255, 0.2)';
+                });
+            }
+            
+            return false;
+        }
+        
+        // Обновление прогресса
+        function updateProgress() {
+            const slots = document.querySelectorAll('.slot');
+            let filledSlots = 0;
+            
+            slots.forEach(slot => {
+                if (slot.firstChild) {
+                    filledSlots++;
+                }
+            });
+            
+            progress = (filledSlots / symbols.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            // Активируем кнопку проверки, если все слоты заполнены
+            document.getElementById('checkButton').disabled = filledSlots !== symbols.length;
+        }
+        
+        // Проверка последовательности
+        function checkSequence() {
+            const slots = document.querySelectorAll('.slot');
+            let isCorrect = true;
+            
+            slots.forEach((slot, index) => {
+                if (!slot.firstChild || slot.firstChild.textContent !== correctOrder[index]) {
+                    isCorrect = false;
+                }
+            });
+            
+            if (isCorrect) {
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('errorMessage').style.display = 'none';
+                
+                // Анимация успеха
+                document.querySelectorAll('.symbol').forEach(symbol => {
+                    symbol.style.animation = 'none';
+                    setTimeout(() => {
+                        symbol.style.animation = 'symbolAppear 0.5s ease forwards';
+                        symbol.style.borderColor = '#33ff99';
+                        symbol.style.boxShadow = '0 0 15px rgba(51, 255, 153, 0.7)';
+                    }, 100);
+                });
+            } else {
+                document.getElementById('successMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+                
+                // Анимация ошибки
+                document.querySelectorAll('.symbol').forEach(symbol => {
+                    symbol.style.borderColor = '#ff3333';
+                    symbol.style.boxShadow = '0 0 15px rgba(255, 51, 51, 0.7)';
+                    
+                    setTimeout(() => {
+                        symbol.style.borderColor = 'rgba(100, 100, 255, 0.5)';
+                        symbol.style.boxShadow = '0 0 10px rgba(0, 100, 255, 0.2)';
+                    }, 1000);
+                });
+            }
+        }
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            initPuzzle();
+            
+            document.getElementById('checkButton').addEventListener('click', checkSequence);
+            
+            // Скрываем сообщения при загрузке
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Orbitron:wght@400;500&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        * {
+            cursor: none;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: 'Montserrat', serif;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #c0c0c0;
+            overflow: hidden;
+            position: relative;
+            transition: filter 0.5s ease;
+            opacity: 0;
+            animation: fadeInBody 1.5s ease-out forwards;
+        }
+
+        @keyframes fadeInBody {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        body.dimmed {
+            filter: brightness(0.3);
+        }
+
+        /* Эффект звездного неба */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 4px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 4px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+            z-index: -1;
+            opacity: 0;
+            animation: fadeInStars 2s ease-out 0.5s forwards;
+        }
+
+        @keyframes fadeInStars {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Анимированные линии */
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(20, 20, 20, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(20, 20, 20, 0.3) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+            opacity: 0;
+            animation: fadeInGrid 1.5s ease-out 1s forwards, gridMove 20s linear infinite;
+        }
+
+        @keyframes fadeInGrid {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .content {
+            text-align: center;
+            padding: 30px;
+            background: rgba(10, 10, 10, 0.7);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            max-width: 650px;
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 0 30px rgba(100, 0, 255, 0.2),
+                        inset 0 0 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease-out 1.5s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff, #00ccff, #33ff99);
+            border-radius: 17px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(5px);
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+            letter-spacing: 2px;
+            font-size: 2.2em;
+        }
+
+        p {
+            margin-bottom: 20px;
+            line-height: 1.7;
+            font-size: 1.1em;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .main-text {
+            font-family: 'Montserrat', serif;
+            color: #e0e0e0;
+        }
+
+        .small-text {
+            font-family: 'Special Elite', cursive;
+            color: #888888;
+            font-size: 0.9em;
+        }
+
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -2px 0 #00ffff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(42px, 9999px, 44px, 0); }
+            5% { clip: rect(12px, 9999px, 59px, 0); }
+            10% { clip: rect(48px, 9999px, 29px, 0); }
+            15% { clip: rect(42px, 9999px, 73px, 0); }
+            20% { clip: rect(63px, 9999px, 27px, 0); }
+            25% { clip: rect(34px, 9999px, 55px, 0); }
+            30% { clip: rect(86px, 9999px, 73px, 0); }
+            35% { clip: rect(20px, 9999px, 20px, 0); }
+            40% { clip: rect(26px, 9999px, 60px, 0); }
+            45% { clip: rect(25px, 9999px, 66px, 0); }
+            50% { clip: rect(57px, 9999px, 98px, 0); }
+            55% { clip: rect(5px, 9999px, 46px, 0); }
+            60% { clip: rect(82px, 9999px, 31px, 0); }
+            65% { clip: rect(54px, 9999px, 27px, 0); }
+            70% { clip: rect(28px, 9999px, 99px, 0); }
+            75% { clip: rect(45px, 9999px, 69px, 0); }
+            80% { clip: rect(23px, 9999px, 85px, 0); }
+            85% { clip: rect(54px, 9999px, 84px, 0); }
+            90% { clip: rect(45px, 9999px, 47px, 0); }
+            95% { clip: rect(37px, 9999px, 20px, 0); }
+            100% { clip: rect(4px, 9999px, 91px, 0); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            5% { clip: rect(52px, 9999px, 74px, 0); }
+            10% { clip: rect(79px, 9999px, 85px, 0); }
+            15% { clip: rect(75px, 9999px, 5px, 0); }
+            20% { clip: rect(67px, 9999px, 61px, 0); }
+            25% { clip: rect(14px, 9999px, 79px, 0); }
+            30% { clip: rect(1px, 9999px, 66px, 0); }
+            35% { clip: rect(86px, 9999px, 30px, 0); }
+            40% { clip: rect(23px, 9999px, 98px, 0); }
+            45% { clip: rect(85px, 9999px, 72px, 0); }
+            50% { clip: rect(71px, 9999px, 75px, 0); }
+            55% { clip: rect(2px, 9999px, 48px, 0); }
+            60% { clip: rect(30px, 9999px, 16px, 0); }
+            65% { clip: rect(59px, 9999px, 50px, 0); }
+            70% { clip: rect(41px, 9999px, 62px, 0); }
+            75% { clip: rect(2px, 9999px, 82px, 0); }
+            80% { clip: rect(47px, 9999px, 73px, 0); }
+            85% { clip: rect(3px, 9999px, 27px, 0); }
+            90% { clip: rect(26px, 9999px, 55px, 0); }
+            95% { clip: rect(42px, 9999px, 97px, 0); }
+            100% { clip: rect(38px, 9999px, 49px, 0); }
+        }
+
+        /* Кастомный курсор-прицел */
+        .cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            opacity: 0;
+            animation: fadeInCursor 1s ease-out 2s forwards;
+        }
+
+        @keyframes fadeInCursor {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .cursor::before,
+        .cursor::after {
+            content: '';
+            position: absolute;
+            background: #00ffff;
+            border-radius: 1px;
+        }
+
+        .cursor::before {
+            width: 2px;
+            height: 20px;
+            top: 10px;
+            left: 19px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .cursor::after {
+            width: 20px;
+            height: 2px;
+            top: 19px;
+            left: 10px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .cursor-dot {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: #ff00ff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            box-shadow: 0 0 10px #ff00ff;
+            opacity: 0;
+            animation: fadeInCursor 1s ease-out 2s forwards;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: scan 3s linear infinite;
+            opacity: 0.7;
+            z-index: 2;
+            opacity: 0;
+            animation: fadeInScanLine 1s ease-out 1s forwards, scan 3s linear infinite;
+        }
+
+        @keyframes fadeInScanLine {
+            from { opacity: 0; }
+            to { opacity: 0.7; }
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        /* Стили для босса */
+        .boss-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: fadeInScale 1s ease-out 2s forwards;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .boss {
+            width: 100%;
+            height: 100%;
+            background: url('./boss2.png') no-repeat center center;
+            background-size: contain;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.1s;
+            overflow: visible;
+            filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.7));
+        }
+
+        .boss.dead {
+            animation: bossDeath 2s forwards;
+        }
+
+        @keyframes bossDeath {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+                filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.7));
+            }
+            50% {
+                transform: scale(1.2) rotate(5deg);
+                opacity: 0.7;
+                filter: drop-shadow(0 0 30px rgba(255, 0, 0, 0.9)) brightness(2);
+            }
+            100% {
+                transform: scale(0) rotate(45deg);
+                opacity: 0;
+                filter: drop-shadow(0 0 50px rgba(255, 0, 0, 0)) brightness(5);
+            }
+        }
+
+        .hp-bar-container {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+            border: 1px solid #333;
+            max-width: 400px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUpStats 1s ease-out 2.2s forwards;
+        }
+
+        @keyframes fadeInUpStats {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hp-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff4500);
+            width: 100%;
+            transition: width 0.3s;
+            position: relative;
+        }
+
+        .hp-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        .hp-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #ff4500;
+            text-shadow: 0 0 10px rgba(255, 69, 0, 0.7);
+            opacity: 0;
+            animation: fadeInUpStats 1s ease-out 2.4s forwards;
+        }
+
+        .damage-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 10;
+            border-radius: 50%;
+        }
+
+        .click-counter {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            margin: 15px 0;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+            opacity: 0;
+            animation: fadeInUpStats 1s ease-out 2.6s forwards;
+        }
+
+        .click-speed-warning {
+            font-family: 'Special Elite', cursive;
+            font-size: 0.9em;
+            margin: 10px 0;
+            color: #ff9900;
+            text-shadow: 0 0 5px rgba(255, 153, 0, 0.5);
+        }
+
+        .boss-defeated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s;
+        }
+
+        .boss-defeated.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .victory-content {
+            text-align: center;
+            padding: 40px;
+            background: rgba(10, 10, 10, 0.9);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            max-width: 600px;
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 0 50px rgba(100, 0, 255, 0.4),
+                        inset 0 0 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        .boss-defeated.active .victory-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .victory-content::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff, #00ccff, #33ff99);
+            border-radius: 17px;
+            z-index: -1;
+            opacity: 0.4;
+            filter: blur(8px);
+        }
+
+        .victory-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3em;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+        
+        .victory-subtext {
+
+            font-family: 'Monsterrat', sans-serif;
+            font-size: 1.2em;
+            color: #e0e0e0;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .continue-btn {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-family: 'Monsterrat', sans-serif;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(100, 0, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .continue-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+            z-index: -1;
+        }
+
+        .continue-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(100, 0, 255, 0.8);
+        }
+
+        .continue-btn:hover::before {
+            left: 100%;
+        }
+
+        .death-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #ff0000, #ff4500, transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* Анимации ударов */
+        .hit-effect {
+            position: absolute;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .crack-effect {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at center, transparent 30%, rgba(255, 0, 0, 0.3) 70%);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffff00;
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 10px #ffff00;
+            z-index: 16;
+        }
+
+        .shockwave {
+            position: absolute;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 17;
+        }
+
+        .damage-number {
+            position: absolute;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
+            pointer-events: none;
+            z-index: 25;
+            opacity: 0;
+            font-size: 1.2em;
+        }
+
+        .screen-shake {
+            animation: screenShake 0.3s ease-out;
+        }
+
+        @keyframes screenShake {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px) translateY(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px) translateY(3px); }
+        }
+
+        .flash-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            pointer-events: none;
+            z-index: 30;
+            opacity: 0;
+        }
+
+        .redirect-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s;
+        }
+
+        .redirect-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .redirect-content {
+            text-align: center;
+            padding: 40px;
+            background: rgba(10, 10, 10, 0.9);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            max-width: 500px;
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 0 50px rgba(100, 0, 255, 0.4),
+                        inset 0 0 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        .redirect-overlay.active .redirect-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .redirect-content::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff, #00ccff, #33ff99);
+            border-radius: 17px;
+            z-index: -1;
+            opacity: 0.4;
+            filter: blur(8px);
+        }
+
+        .redirect-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8em;
+            color: #00ffff;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+            margin-bottom: 20px;
+        }
+
+        .redirect-subtext {
+            font-family: 'Montserrat', serif;
+            font-size: 1.1em;
+            color: #e0e0e0;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .redirect-countdown {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="grid-lines"></div>
+    <div class="scan-line"></div>
+    
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <div class="content">
+        <h1 class="glitch-text" data-text="БОСС - 15000 КЛИКОВ">БОСС - 15000 КЛИКОВ</h1>
+        <p class="main-text">Перед вами древнее существо, защищенное мощным барьером. Только ваша настойчивость может разрушить его защиту.</p> 
+        <p class="main-text">Каждый клик наносит урон. Продолжайте атаковать, пока здоровье босса не достигнет нуля. Тогда откроется путь к тайному знанию.</p> 
+    </div>
+
+    <div class="click-counter">Кликов: <span id="clickCount">0</span></div>
+    
+    <div class="hp-bar-container">
+        <div class="hp-bar" id="hpBar"></div>
+    </div>
+    <div class="hp-text">Здоровье: <span id="hpText">15000</span> / 15000</div>
+    
+    <div class="boss-container">
+        <div class="death-particles" id="deathParticles"></div>
+        <div class="boss" id="boss">
+            <div class="damage-effect" id="damageEffect"></div>
+        </div>
+    </div>
+
+    <div class="boss-defeated" id="bossDefeated">
+        <div class="victory-content">
+            <div class="victory-text">ПОБЕДА!</div>
+            <p class="victory-subtext">Вы победили древнее существо и разрушили его барьер. Теперь перед вами открывается путь к тайному знанию.</p>
+            <button class="continue-btn" id="continueBtn">продолжить</button>
+        </div>
+    </div>
+
+    <div class="redirect-overlay" id="redirectOverlay">
+        <div class="redirect-content">
+            <div class="redirect-text">ПЕРЕХОД НА СЕКРЕТНУЮ СТРАНИЦУ</div>
+            <p class="redirect-subtext">Вы будете перенаправлены через несколько секунд...</p>
+            <div class="redirect-countdown" id="redirectCountdown">5</div>
+        </div>
+    </div>
+
+    <script>
+        // Кастомный курсор
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+        });
+
+        // Логика босса
+        const boss = document.getElementById('boss');
+        const bossContainer = document.querySelector('.boss-container');
+        const hpBar = document.getElementById('hpBar');
+        const hpText = document.getElementById('hpText');
+        const clickCount = document.getElementById('clickCount');
+        const damageEffect = document.getElementById('damageEffect');
+        const bossDefeated = document.getElementById('bossDefeated');
+        const continueBtn = document.getElementById('continueBtn');
+        const deathParticles = document.getElementById('deathParticles');
+        const redirectOverlay = document.getElementById('redirectOverlay');
+        const redirectCountdown = document.getElementById('redirectCountdown');
+
+        let currentHP = 15000;
+        let clicks = 0;
+        const maxHP = 15000;
+        
+        // Защита от кликеров
+        let lastClickTime = 0;
+        const clickCooldown = 100;
+
+        // Функция для обновления отображения здоровья
+        function updateHP() {
+            const hpPercent = (currentHP / maxHP) * 100;
+            hpBar.style.width = hpPercent + '%';
+            hpText.textContent = currentHP.toLocaleString();
+            
+            // Изменение цвета HP бара в зависимости от здоровья
+            if (hpPercent > 50) {
+                hpBar.style.background = 'linear-gradient(90deg, #ff0000, #ff4500)';
+            } else if (hpPercent > 25) {
+                hpBar.style.background = 'linear-gradient(90deg, #ff4500, #ff8c00)';
+            } else {
+                hpBar.style.background = 'linear-gradient(90deg, #ff8c00, #ffa500)';
+            }
+        }
+
+        // Функция для создания эффекта трещины
+        function createCrackEffect(x, y) {
+            const crack = document.createElement('div');
+            crack.classList.add('crack-effect');
+            crack.style.left = (x - 40) + 'px';
+            crack.style.top = (y - 40) + 'px';
+            
+            bossContainer.appendChild(crack);
+            
+            const animation = crack.animate([
+                { transform: 'scale(0)', opacity: 1 },
+                { transform: 'scale(1.5)', opacity: 0 }
+            ], {
+                duration: 600,
+                easing: 'ease-out'
+            });
+            
+            animation.onfinish = () => {
+                crack.remove();
+            };
+        }
+
+        // Функция для создания искр
+        function createSparks(x, y) {
+            const sparkCount = 8 + Math.floor(Math.random() * 8);
+            
+            for (let i = 0; i < sparkCount; i++) {
+                const spark = document.createElement('div');
+                spark.classList.add('spark');
+                
+                const bossRect = bossContainer.getBoundingClientRect();
+                spark.style.left = (x + bossRect.left) + 'px';
+                spark.style.top = (y + bossRect.top) + 'px';
+                
+                document.body.appendChild(spark);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 30 + Math.random() * 70;
+                const size = 2 + Math.random() * 4;
+                
+                spark.style.width = size + 'px';
+                spark.style.height = size + 'px';
+                
+                const animation = spark.animate([
+                    { 
+                        transform: 'translate(0, 0) scale(1)',
+                        opacity: 1
+                    },
+                    { 
+                        transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0)`,
+                        opacity: 0
+                    }
+                ], {
+                    duration: 400 + Math.random() * 400,
+                    easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
+                });
+                
+                animation.onfinish = () => {
+                    spark.remove();
+                };
+            }
+        }
+
+        // Функция для создания ударной волны
+        function createShockwave(x, y) {
+            const shockwave = document.createElement('div');
+            shockwave.classList.add('shockwave');
+            
+            const bossRect = bossContainer.getBoundingClientRect();
+            shockwave.style.left = (x + bossRect.left - 50) + 'px';
+            shockwave.style.top = (y + bossRect.top - 50) + 'px';
+            
+            document.body.appendChild(shockwave);
+            
+            const animation = shockwave.animate([
+                { 
+                    transform: 'scale(0)',
+                    opacity: 0.8,
+                    width: '0px',
+                    height: '0px'
+                },
+                { 
+                    transform: 'scale(1)',
+                    opacity: 0,
+                    width: '100px',
+                    height: '100px'
+                }
+            ], {
+                duration: 500,
+                easing: 'ease-out'
+            });
+            
+            animation.onfinish = () => {
+                shockwave.remove();
+            };
+        }
+
+        // Функция для отображения числа урона
+        function showDamageNumber(x, y, text) {
+            const damageNumber = document.createElement('div');
+            damageNumber.classList.add('damage-number');
+            damageNumber.textContent = text;
+            
+            const bossRect = bossContainer.getBoundingClientRect();
+            damageNumber.style.left = (x + bossRect.left) + 'px';
+            damageNumber.style.top = (y + bossRect.top - 20) + 'px';
+            
+            document.body.appendChild(damageNumber);
+            
+            const moveX = (Math.random() - 0.5) * 50;
+            
+            const animation = damageNumber.animate([
+                { 
+                    transform: 'translateY(0) scale(1)',
+                    opacity: 1
+                },
+                { 
+                    transform: `translate(${moveX}px, -60px) scale(1.3)`,
+                    opacity: 0
+                }
+            ], {
+                duration: 1000,
+                easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
+            });
+            
+            animation.onfinish = () => {
+                damageNumber.remove();
+            };
+        }
+
+        // Функция для эффекта вспышки экрана
+        function createFlashEffect() {
+            const flash = document.createElement('div');
+            flash.classList.add('flash-effect');
+            
+            document.body.appendChild(flash);
+            
+            const animation = flash.animate([
+                { opacity: 0.3 },
+                { opacity: 0 }
+            ], {
+                duration: 100,
+                easing: 'ease-out'
+            });
+            
+            animation.onfinish = () => {
+                flash.remove();
+            };
+        }
+
+        // Функция для тряски экрана
+        function screenShake() {
+            document.body.classList.add('screen-shake');
+            setTimeout(() => {
+                document.body.classList.remove('screen-shake');
+            }, 300);
+        }
+
+        // Функция для случайного выбора анимации удара
+        function playRandomHitAnimation(x, y) {
+            const animations = [
+                'basicHit',
+                'criticalHit',
+                'powerHit',
+                'magicHit'
+            ];
+            
+            const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+            
+            switch (randomAnimation) {
+                case 'basicHit':
+                    createCrackEffect(x, y);
+                    createSparks(x, y);
+                    showDamageNumber(x, y, '-1');
+                    break;
+                    
+                case 'criticalHit':
+                    createShockwave(x, y);
+                    createSparks(x, y);
+                    createFlashEffect();
+                    showDamageNumber(x, y, 'CRITICAL!');
+                    break;
+                    
+                case 'powerHit':
+                    screenShake();
+                    createCrackEffect(x, y);
+                    createShockwave(x, y);
+                    showDamageNumber(x, y, 'POWER!');
+                    break;
+                    
+                case 'magicHit':
+                    createFlashEffect();
+                    createSparks(x, y);
+                    showDamageNumber(x, y, 'MAGIC!');
+                    break;
+            }
+            
+            // Всегда показываем базовый эффект повреждения
+            showDamageEffect();
+        }
+
+        // Функция для отображения эффекта получения урона
+        function showDamageEffect() {
+            damageEffect.style.background = 'radial-gradient(circle, rgba(255,0,0,0.7) 0%, transparent 70%)';
+            damageEffect.style.opacity = '1';
+            
+            // Анимация сотрясения босса
+            boss.style.transform = 'translateX(1px)';
+            
+            setTimeout(() => {
+                damageEffect.style.opacity = '0';
+                boss.style.transform = 'translateX(0)';
+            }, 200);
+        }
+
+        // Функция для создания частиц смерти
+        function createDeathParticles() {
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Случайная позиция вокруг босса
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 100 + Math.random() * 100;
+                const startX = 150 + Math.cos(angle) * distance;
+                const startY = 150 + Math.sin(angle) * distance;
+                
+                particle.style.left = startX + 'px';
+                particle.style.top = startY + 'px';
+                
+                deathParticles.appendChild(particle);
+                
+                // Анимация частицы
+                const animation = particle.animate([
+                    { 
+                        transform: 'translate(0, 0) scale(1)',
+                        opacity: 1
+                    },
+                    { 
+                        transform: `translate(${Math.cos(angle) * 200}px, ${Math.sin(angle) * 200}px) scale(0)`,
+                        opacity: 0
+                    }
+                ], {
+                    duration: 1000 + Math.random() * 1000,
+                    delay: Math.random() * 500,
+                    easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
+                });
+                
+                animation.onfinish = () => {
+                    particle.remove();
+                };
+            }
+        }
+
+        // Функция для анимации смерти босса
+        function bossDeathAnimation() {
+            // Добавляем класс для анимации смерти
+            boss.classList.add('dead');
+            
+            // Создаем частицы смерти
+            createDeathParticles();
+            
+            // Показываем экран победы после завершения анимации
+            setTimeout(() => {
+                bossDefeated.classList.add('active');
+            }, 2000);
+        }
+
+        // Обработчик клика по боссу с защитой от кликеров
+        boss.addEventListener('click', (e) => {
+            if (currentHP <= 0) return;
+            
+            const currentTime = Date.now();
+            
+            // Проверяем, прошло ли достаточно времени с последнего клика
+            if (currentTime - lastClickTime < clickCooldown) {
+                // Показываем эффект блокировки слишком быстрого клика
+                boss.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    boss.style.transform = 'scale(1)';
+                }, 100);
+                return;
+            }
+            
+            // Обновляем время последнего клика
+            lastClickTime = currentTime;
+            
+            // Наносим урон
+            currentHP -= 1;
+            clicks += 1;
+            
+            // Получаем координаты клика относительно босса
+            const rect = boss.getBoundingClientRect();
+            const bossContainerRect = bossContainer.getBoundingClientRect();
+            const x = e.clientX - bossContainerRect.left;
+            const y = e.clientY - bossContainerRect.top;
+            
+            // Обновляем отображение
+            updateHP();
+            clickCount.textContent = clicks.toLocaleString();
+            
+            // Воспроизводим случайную анимацию удара
+            playRandomHitAnimation(x, y);
+            
+            // Проверяем, побежден ли босс
+            if (currentHP <= 0) {
+                bossDeathAnimation();
+            }
+        });
+
+        // Обработчик кнопки продолжения
+        continueBtn.addEventListener('click', () => {
+            // Затемняем страницу
+            document.body.classList.add('dimmed');
+            
+            // Показываем оверлей перенаправления
+            redirectOverlay.classList.add('active');
+            
+            // Запускаем обратный отсчет
+            let countdown = 5;
+            redirectCountdown.textContent = countdown;
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                redirectCountdown.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = 'https://bots.pepesoft.ru/';
+                }
+            }, 1000);
+        });
+
+        // Инициализация
+        updateHP();
+    </script>
+</body>
+</html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Праздничные конверты с призами</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0014, #1a0029, #0a0014);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+            overflow-x: hidden;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        header {
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #d8b4ff;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+        }
+        
+        .instructions {
+            background: rgba(30, 0, 50, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(216, 180, 255, 0.3);
+            color: #ffffff;
+            font-size: 1.1rem;
+        }
+        
+        .instructions p {
+            margin-bottom: 10px;
+        }
+        
+        .instructions strong {
+            font-weight: 500;
+            color: #d8b4ff;
+        }
+        
+        .envelopes-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .envelope {
+            width: 220px;
+            height: 160px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .envelope:hover {
+            transform: translateY(-10px);
+        }
+        
+        .envelope-body {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2a004d, #1a0033);
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            overflow: hidden;
+            border: 1px solid #4a1f7a;
+        }
+        
+        .envelope-body:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(216, 180, 255, 0.1) 0%, rgba(216, 180, 255, 0) 50%);
+        }
+        
+        .envelope-flap {
+            position: absolute;
+            width: 100%;
+            height: 70px;
+            background: linear-gradient(135deg, #3a005d, #2a004d);
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+            top: 0;
+            z-index: 2;
+            transition: transform 0.8s ease;
+            transform-origin: top;
+            box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
+            border: 1px solid #4a1f7a;
+            border-bottom: none;
+        }
+        
+        .envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+        }
+        
+        .envelope-seal {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: #000000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            transition: all 0.5s;
+            border: 2px solid #d8b4ff;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
+        .envelope.open .envelope-seal {
+            opacity: 0;
+            transform: translateX(-50%) scale(0);
+        }
+        
+        .envelope-content {
+            position: absolute;
+            width: 90%;
+            height: 80%;
+            background: linear-gradient(135deg, #1a0033, #0a0014);
+            border-radius: 5px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 15px;
+            opacity: 0;
+            transition: opacity 0.5s 0.5s;
+            z-index: 0;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+            border: 1px solid #4a1f7a;
+        }
+        
+        .envelope.open .envelope-content {
+            opacity: 1;
+            z-index: 4;
+        }
+        
+        .prize {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            margin-top: 10px;
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #d8b4ff;
+            opacity: 0;
+            z-index: 1000;
+        }
+        
+        .message {
+            background: rgba(30, 0, 50, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(216, 180, 255, 0.3);
+            display: none;
+            color: #ffffff;
+        }
+        
+        .message h2 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 2rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+        }
+        
+        .message p {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            line-height: 1.5;
+        }
+        
+        .message strong {
+            color: #d8b4ff;
+            font-weight: 500;
+        }
+        
+        .btn {
+            background: #ffffff;
+            color: #2a004d;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .btn:hover {
+            background: #d8b4ff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: #d8b4ff;
+            font-size: 1.5rem;
+            text-shadow: 0 0 5px rgba(216, 180, 255, 0.5);
+            user-select: none;
+            z-index: 1000;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+        
+        .purple-stripe {
+            position: absolute;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(90deg, transparent, #d8b4ff, transparent);
+            top: 50%;
+            opacity: 0.5;
+        }
+        
+        .envelope-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(216, 180, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, rgba(216, 180, 255, 0.1) 2px, transparent 2px);
+            background-size: 20px 20px;
+        }
+        
+        .envelope-number {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #d8b4ff;
+            font-weight: 600;
+            font-size: 1.2rem;
+            z-index: 2;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .instructions {
+                font-size: 1rem;
+                padding: 15px;
+            }
+            
+            .envelope {
+                width: 160px;
+                height: 120px;
+            }
+            
+            .envelope-seal {
+                width: 40px;
+                height: 40px;
+                top: 20px;
+                font-size: 1rem;
+            }
+            
+            .prize {
+                font-size: 1rem;
+            }
+            
+            .message {
+                padding: 20px;
+            }
+            
+            .message h2 {
+                font-size: 1.7rem;
+            }
+            
+            .message p {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Праздничные конверты</h1>
+            <p class="subtitle">Открой один конверт и получи свой приз!</p>
+        </header>
+        
+        <div class="instructions">
+            <p>Выберите один из праздничных конвертов, чтобы открыть его и получить приз.</p>
+            <p><strong>Внимание:</strong> Вы можете открыть только один конверт!</p>
+        </div>
+        
+        <div class="envelopes-container">
+            <div class="envelope" id="envelope1">
+                <div class="envelope-body">
+                    <div class="envelope-pattern"></div>
+                    <div class="purple-stripe"></div>
+                    <div class="envelope-number">1</div>
+                </div>
+                <div class="envelope-flap"></div>
+                <div class="envelope-seal">1</div>
+                <div class="envelope-content">
+                    <div class="prize">Platinum VIP на 30 дней</div>
+                </div>
+            </div>
+            
+            <div class="envelope" id="envelope2">
+                <div class="envelope-body">
+                    <div class="envelope-pattern"></div>
+                    <div class="purple-stripe"></div>
+                    <div class="envelope-number">2</div>
+                </div>
+                <div class="envelope-flap"></div>
+                <div class="envelope-seal">2</div>
+                <div class="envelope-content">
+                    <div class="prize">Platinum VIP на 30 дней</div>
+                </div>
+            </div>
+            
+            <div class="envelope" id="envelope3">
+                <div class="envelope-body">
+                    <div class="envelope-pattern"></div>
+                    <div class="purple-stripe"></div>
+                    <div class="envelope-number">3</div>
+                </div>
+                <div class="envelope-flap"></div>
+                <div class="envelope-seal">3</div>
+                <div class="envelope-content">
+                    <div class="prize">Platinum VIP на 30 дней</div>
+                </div>
+            </div>
+            
+            <div class="envelope" id="envelope4">
+                <div class="envelope-body">
+                    <div class="envelope-pattern"></div>
+                    <div class="purple-stripe"></div>
+                    <div class="envelope-number">4</div>
+                </div>
+                <div class="envelope-flap"></div>
+                <div class="envelope-seal">4</div>
+                <div class="envelope-content">
+                    <div class="prize">Platinum VIP на 30 дней</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="message" id="message">
+            <h2>Поздравляем!</h2>
+            <p>Вы получили приз: <strong>Platinum VIP на 30 дней</strong></p>
+            <p>Ваш приз скоро будет активирован в вашем аккаунте.</p>
+            <button class="btn" id="closeMessage">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const envelopes = document.querySelectorAll('.envelope');
+            const message = document.getElementById('message');
+            const closeMessageBtn = document.getElementById('closeMessage');
+            
+            // Проверяем, был ли уже открыт конверт
+            const openedEnvelopeId = localStorage.getItem('openedEnvelope');
+            let envelopeOpened = false;
+            
+            if (openedEnvelopeId) {
+                envelopeOpened = true;
+                // Показываем ранее открытый конверт
+                const openedEnvelope = document.getElementById(openedEnvelopeId);
+                if (openedEnvelope) {
+                    openedEnvelope.classList.add('open');
+                    // Блокируем все конверты
+                    envelopes.forEach(env => {
+                        env.style.opacity = '0.5';
+                        env.style.pointerEvents = 'none';
+                    });
+                    openedEnvelope.style.opacity = '1';
+                    
+                    // Показываем сообщение с призом
+                    message.style.display = 'block';
+                }
+            }
+            
+            // Создание снежинок
+            function createSnowflakes() {
+                const snowContainer = document.body;
+                const snowflakeCount = 50;
+                
+                for (let i = 0; i < snowflakeCount; i++) {
+                    const snowflake = document.createElement('div');
+                    snowflake.innerHTML = '❄';
+                    snowflake.classList.add('snowflake');
+                    
+                    // Случайная позиция и анимация
+                    const startPosition = Math.random() * 100;
+                    const duration = 10 + Math.random() * 20;
+                    const delay = Math.random() * 5;
+                    const size = 10 + Math.random() * 20;
+                    
+                    snowflake.style.left = `${startPosition}vw`;
+                    snowflake.style.fontSize = `${size}px`;
+                    snowflake.style.animation = `fall ${duration}s linear ${delay}s infinite`;
+                    
+                    snowContainer.appendChild(snowflake);
+                }
+            }
+            
+            // Создание конфетти
+            function createConfetti() {
+                const confettiCount = 150;
+                const colors = ['#000000', '#ffffff', '#d8b4ff', '#4a1f7a', '#2a004d', '#1a0033'];
+                
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    
+                    // Случайные свойства конфетти
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const size = 5 + Math.random() * 10;
+                    const left = Math.random() * 100;
+                    const animationDuration = 1 + Math.random() * 2;
+                    const animationDelay = Math.random() * 2;
+                    
+                    confetti.style.backgroundColor = color;
+                    confetti.style.width = `${size}px`;
+                    confetti.style.height = `${size}px`;
+                    confetti.style.left = `${left}vw`;
+                    confetti.style.top = '-10px';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Анимация падения конфетти
+                    setTimeout(() => {
+                        confetti.style.opacity = '1';
+                        confetti.style.transform = `translateY(${window.innerHeight}px) rotate(${Math.random() * 720}deg)`;
+                        confetti.style.transition = `all ${animationDuration}s ease-out`;
+                    }, 10);
+                    
+                    // Удаление конфетти после анимации
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, animationDuration * 1000 + 100);
+                }
+            }
+            
+            // Обработчик открытия конверта
+            envelopes.forEach(envelope => {
+                envelope.addEventListener('click', function() {
+                    if (envelopeOpened) {
+                        alert('Вы уже открыли конверт!');
+                        return;
+                    }
+                    
+                    // Открываем выбранный конверт
+                    this.classList.add('open');
+                    envelopeOpened = true;
+                    
+                    // Сохраняем информацию об открытом конверте в localStorage
+                    localStorage.setItem('openedEnvelope', this.id);
+                    
+                    // Блокируем другие конверты
+                    envelopes.forEach(env => {
+                        if (env !== this) {
+                            env.style.opacity = '0.5';
+                            env.style.pointerEvents = 'none';
+                        }
+                    });
+                    
+                    // Показываем сообщение с призом
+                    setTimeout(() => {
+                        message.style.display = 'block';
+                        createConfetti();
+                    }, 800);
+                });
+            });
+            
+            // Закрытие сообщения
+            closeMessageBtn.addEventListener('click', function() {
+                message.style.display = 'none';
+            });
+            
+            // Запуск анимации снежинок
+            createSnowflakes();
+        });
+    </script>
+</body>
+</html>

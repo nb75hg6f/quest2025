@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расшифровка древних символов</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Orbitron:wght@400;500&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        * {
+            cursor: none;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: 'Montserrat', serif;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #c0c0c0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Эффект звездного неба */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 4px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 4px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+            z-index: -1;
+        }
+
+        /* Анимированные линии */
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(20, 20, 20, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(20, 20, 20, 0.3) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .content {
+            text-align: center;
+            padding: 30px;
+            background: rgba(10, 10, 10, 0.7);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            max-width: 700px;
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 0 30px rgba(100, 0, 255, 0.2),
+                        inset 0 0 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .content::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff, #00ccff, #33ff99);
+            border-radius: 17px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(5px);
+        }
+
+        /* Стили для символов */
+        .symbol-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 30px auto;
+            max-width: 400px;
+        }
+
+        .symbol {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #8B4513;
+            cursor: pointer;
+            background: rgba(222, 184, 135, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .symbol::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, #FFD700, transparent 30%);
+            animation: rotate 4s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .symbol:hover::before {
+            opacity: 0.3;
+        }
+
+        .symbol:hover {
+            border-color: #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            transform: scale(1.05);
+        }
+
+        .symbol.active {
+            border-color: #FFD700;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+            background: rgba(222, 184, 135, 0.3);
+            transform: scale(1.1);
+        }
+
+        .symbol.correct {
+            border-color: #00ff99;
+            box-shadow: 0 0 25px rgba(0, 255, 153, 0.8);
+            background: rgba(0, 255, 153, 0.1);
+        }
+
+        .symbol.incorrect {
+            border-color: #ff0066;
+            box-shadow: 0 0 25px rgba(255, 0, 102, 0.8);
+            background: rgba(255, 0, 102, 0.1);
+            animation: shake 0.5s;
+        }
+
+        @keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) scale(1.1); }
+            25% { transform: translateX(-5px) scale(1.1); }
+            75% { transform: translateX(5px) scale(1.1); }
+        }
+
+        /* Стили для отображения последовательности */
+        .sequence-display {
+            margin: 20px auto;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #8B4513;
+            border-radius: 8px;
+            min-height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .sequence-symbol {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #8B4513;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            border-radius: 5px;
+            background: rgba(222, 184, 135, 0.2);
+        }
+
+        .sequence-symbol.current {
+            border-color: #FFD700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        /* Кнопки управления */
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .game-btn {
+            background: linear-gradient(45deg, #00ffff, #0077ff);
+            border: 1px solid #00ffff;
+            color: #ffffff;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .game-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px currentColor;
+            filter: brightness(1.2);
+        }
+
+        .game-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .reset-btn {
+            background: rgba(100, 0, 0, 0.7);
+            border: 1px solid #ff0066;
+            color: #c0c0c0;
+            padding: 8px 15px;
+            font-size: 12px;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .reset-btn:hover {
+            background: rgba(150, 0, 0, 0.7);
+            box-shadow: 0 0 10px rgba(255, 0, 102, 0.7);
+        }
+
+        /* Счетчики и таймер */
+        .attempts-counter {
+            margin-top: 15px;
+            font-family: 'Special Elite', cursive;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .attempts-counter.warning {
+            color: #ff6666;
+        }
+
+        .attempts-counter.danger {
+            color: #ff0066;
+            animation: pulse 1s infinite;
+        }
+
+        .timer {
+            margin-top: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: #00ffff;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Сообщения */
+        .access-granted {
+            color: #00ff99;
+            font-size: 24px;
+            margin-top: 20px;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(0, 255, 153, 0.7);
+            animation: glow 2s infinite alternate;
+        }
+
+        .access-denied {
+            color: #ff0066;
+            font-size: 18px;
+            margin-top: 20px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .game-message {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Special Elite', cursive;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(0, 255, 153, 0.7); }
+            to { text-shadow: 0 0 20px rgba(0, 255, 153, 1), 0 0 30px rgba(0, 255, 153, 0.7); }
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+            letter-spacing: 2px;
+            font-size: 2.2em;
+        }
+
+        p {
+            margin-bottom: 20px;
+            line-height: 1.7;
+            font-size: 1.1em;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .main-text {
+            font-family: 'Montserrat', serif;
+            color: #e0e0e0;
+        }
+
+        .small-text {
+            font-family: 'Montserrat', cursive;
+            color: #888888;
+            font-size: 0.9em;
+        }
+
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -2px 0 #00ffff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        /* Кастомный курсор-прицел */
+        .cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+        }
+
+        .cursor::before,
+        .cursor::after {
+            content: '';
+            position: absolute;
+            background: #00ffff;
+            border-radius: 1px;
+        }
+
+        .cursor::before {
+            width: 2px;
+            height: 20px;
+            top: 10px;
+            left: 19px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .cursor::after {
+            width: 20px;
+            height: 2px;
+            top: 19px;
+            left: 10px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .cursor-dot {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: #ff00ff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            box-shadow: 0 0 10px #ff00ff;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: scan 3s linear infinite;
+            opacity: 0.7;
+            z-index: 2;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        /* Древние символы */
+        .ancient-symbol {
+            font-size: 32px;
+            filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.7));
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-lines"></div>
+    <div class="scan-line"></div>
+    
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <div class="content">
+        
+        <h1 class="glitch-text" data-text="ДРЕВНИЕ СИМВОЛЫ">ДРЕВНИЕ СИМВОЛЫ</h1>
+        <p class="main-text">Археологи обнаружили древний артефакт с загадочными символами. Вам нужно запомнить и повторить правильную последовательность.</p> 
+        <p class="main-text">Сначала система покажет последовательность символов, затем вы должны повторить её в том же порядке.</p> 
+        
+        <div class="control-buttons">
+            <button id="startBtn" class="game-btn">НАЧАТЬ ИГРУ</button>
+            <button id="showSequenceBtn" class="game-btn" disabled>ПОКАЗАТЬ ПОСЛЕДОВАТЕЛЬНОСТЬ</button>
+        </div>
+
+        <div class="sequence-display" id="sequenceDisplay">
+            <div class="small-text">Нажмите "Начать игру" чтобы увидеть последовательность</div>
+        </div>
+
+        <div class="symbol-grid" id="symbolsContainer">
+            <!-- Древние символы генерируются скриптом -->
+        </div>
+
+        <div id="gameInfo">
+            <div id="attemptsCounter" class="attempts-counter">Уровень: 1 | Попытки: 3</div>
+            <div id="timer" class="timer"></div>
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        // Кастомный курсор
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+        });
+
+        // Игровая логика
+        const ancientSymbols = ['⚡', '★', '◆', '♠', '♥', '♦', '♣', '∞', '∆', '¶', '§', '¥'];
+        const maxAttempts = 3;
+        const maxLevel = 10;
+        const resetTimeMinutes = 30;
+        
+        // Элементы интерфейса
+        const symbolsContainer = document.getElementById('symbolsContainer');
+        const sequenceDisplay = document.getElementById('sequenceDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const showSequenceBtn = document.getElementById('showSequenceBtn');
+        const attemptsCounter = document.getElementById('attemptsCounter');
+        const timerElement = document.getElementById('timer');
+        const messageElement = document.getElementById('message');
+        
+        // Игровые переменные
+        let gameData = JSON.parse(localStorage.getItem('ancientSymbolsGame')) || {
+            level: 1,
+            attempts: maxAttempts,
+            lastAttemptTime: null,
+            gameCompleted: false,
+            currentSequence: [],
+            playerSequence: [],
+            isShowingSequence: false,
+            isPlayerTurn: false
+        };
+
+        // Инициализация символов
+        function initializeSymbols() {
+            symbolsContainer.innerHTML = '';
+            const symbolsToUse = ancientSymbols.slice(0, 8); // Используем первые 8 символов
+            
+            symbolsToUse.forEach((symbol, index) => {
+                const symbolElement = document.createElement('div');
+                symbolElement.className = 'symbol';
+                symbolElement.innerHTML = `<span class="ancient-symbol">${symbol}</span>`;
+                symbolElement.dataset.symbol = symbol;
+                symbolElement.dataset.index = index;
+                
+                symbolElement.addEventListener('click', () => handleSymbolClick(symbol, index));
+                
+                symbolsContainer.appendChild(symbolElement);
+            });
+        }
+
+        // Генерация случайной последовательности
+        function generateSequence(length) {
+            const sequence = [];
+            const availableSymbols = ancientSymbols.slice(0, 8);
+            
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * availableSymbols.length);
+                sequence.push(availableSymbols[randomIndex]);
+            }
+            
+            return sequence;
+        }
+
+        // Показать последовательность игроку
+        function showSequence() {
+            gameData.isShowingSequence = true;
+            gameData.isPlayerTurn = false;
+            showSequenceBtn.disabled = true;
+            
+            sequenceDisplay.innerHTML = '';
+            gameData.currentSequence.forEach((symbol, index) => {
+                const seqSymbol = document.createElement('div');
+                seqSymbol.className = 'sequence-symbol';
+                seqSymbol.innerHTML = `<span class="ancient-symbol">${symbol}</span>`;
+                sequenceDisplay.appendChild(seqSymbol);
+            });
+
+            let currentIndex = 0;
+            
+            function highlightNextSymbol() {
+                const symbols = sequenceDisplay.querySelectorAll('.sequence-symbol');
+                
+                // Сбрасываем все подсветки
+                symbols.forEach(s => s.classList.remove('current'));
+                
+                if (currentIndex < symbols.length) {
+                    // Подсвечиваем текущий символ
+                    symbols[currentIndex].classList.add('current');
+                    
+                    // Также подсвечиваем соответствующий символ в сетке
+                    const gridSymbols = symbolsContainer.querySelectorAll('.symbol');
+                    gridSymbols.forEach(sym => {
+                        if (sym.dataset.symbol === gameData.currentSequence[currentIndex]) {
+                            sym.classList.add('active');
+                            setTimeout(() => sym.classList.remove('active'), 500);
+                        }
+                    });
+                    
+                    currentIndex++;
+                    setTimeout(highlightNextSymbol, 1000);
+                } else {
+                    // Завершаем показ последовательности
+                    setTimeout(() => {
+                        gameData.isShowingSequence = false;
+                        gameData.isPlayerTurn = true;
+                        gameData.playerSequence = [];
+                        sequenceDisplay.innerHTML = '<div class="small-text">Ваша очередь! Повторите последовательность</div>';
+                        updateUI();
+                    }, 500);
+                }
+            }
+            
+            highlightNextSymbol();
+        }
+
+        // Обработчик клика по символу
+        function handleSymbolClick(symbol, index) {
+            if (!gameData.isPlayerTurn || gameData.isShowingSequence) return;
+            
+            const clickedSymbol = symbolsContainer.querySelector(`.symbol[data-index="${index}"]`);
+            clickedSymbol.classList.add('active');
+            
+            // Добавляем символ в последовательность игрока
+            gameData.playerSequence.push(symbol);
+            
+            // Обновляем отображение последовательности игрока
+            updatePlayerSequenceDisplay();
+            
+            // Проверяем правильность
+            const currentIndex = gameData.playerSequence.length - 1;
+            if (gameData.playerSequence[currentIndex] !== gameData.currentSequence[currentIndex]) {
+                // Неправильный символ
+                handleWrongSequence();
+            } else if (gameData.playerSequence.length === gameData.currentSequence.length) {
+                // Правильная полная последовательность
+                handleCorrectSequence();
+            }
+            
+            setTimeout(() => {
+                clickedSymbol.classList.remove('active');
+            }, 300);
+        }
+
+        // Обновление отображения последовательности игрока
+        function updatePlayerSequenceDisplay() {
+            sequenceDisplay.innerHTML = '';
+            gameData.playerSequence.forEach((symbol, index) => {
+                const seqSymbol = document.createElement('div');
+                seqSymbol.className = 'sequence-symbol';
+                seqSymbol.innerHTML = `<span class="ancient-symbol">${symbol}</span>`;
+                
+                // Проверяем правильность символа
+                if (symbol === gameData.currentSequence[index]) {
+                    seqSymbol.style.borderColor = '#00ff99';
+                    seqSymbol.style.background = 'rgba(0, 255, 153, 0.1)';
+                }
+                
+                sequenceDisplay.appendChild(seqSymbol);
+            });
+        }
+
+        // Обработка неправильной последовательности
+        function handleWrongSequence() {
+            gameData.attempts--;
+            gameData.isPlayerTurn = false;
+            
+            // Подсвечиваем неправильные символы
+            const gridSymbols = symbolsContainer.querySelectorAll('.symbol');
+            gridSymbols.forEach(sym => {
+                if (sym.dataset.symbol === gameData.playerSequence[gameData.playerSequence.length - 1]) {
+                    sym.classList.add('incorrect');
+                    setTimeout(() => sym.classList.remove('incorrect'), 1000);
+                }
+            });
+            
+            showTemporaryMessage('Неправильная последовательность!', '#ff0066');
+            
+            if (gameData.attempts <= 0) {
+                // Игра окончена
+                handleGameOver();
+            } else {
+                // Показываем последовательность снова
+                setTimeout(() => {
+                    showSequence();
+                }, 1500);
+            }
+            
+            saveGameData();
+            updateUI();
+        }
+
+        // Обработка правильной последовательности
+        function handleCorrectSequence() {
+            gameData.isPlayerTurn = false;
+            
+            // Подсвечиваем все символы как правильные
+            const gridSymbols = symbolsContainer.querySelectorAll('.symbol');
+            gridSymbols.forEach(sym => {
+                sym.classList.add('correct');
+                setTimeout(() => sym.classList.remove('correct'), 1000);
+            });
+            
+            showTemporaryMessage('Правильно! Переход на следующий уровень', '#00ff99');
+            
+            if (gameData.level >= maxLevel) {
+                // Игра пройдена
+                handleGameComplete();
+            } else {
+                // Переход на следующий уровень
+                setTimeout(() => {
+                    gameData.level++;
+                    gameData.attempts = maxAttempts;
+                    startNewLevel();
+                }, 2000);
+            }
+            
+            saveGameData();
+            updateUI();
+        }
+
+        // Начало нового уровня
+        function startNewLevel() {
+            gameData.currentSequence = generateSequence(gameData.level + 2); // Увеличиваем длину последовательности
+            gameData.playerSequence = [];
+            sequenceDisplay.innerHTML = '<div class="small-text">Готовьтесь запомнить последовательность...</div>';
+            updateUI();
+            
+            setTimeout(() => {
+                showSequence();
+            }, 1000);
+        }
+
+        // Обработка завершения игры
+        function handleGameComplete() {
+            gameData.gameCompleted = true;
+            messageElement.innerHTML = '<div class="access-granted">ВЫ РАСШИФРОВАЛИ ВСЕ СИМВОЛЫ!</div>';
+            startBtn.disabled = true;
+            showSequenceBtn.disabled = true;
+            
+            // Перенаправление через 3 секунды
+            setTimeout(() => {
+                window.location.href = 'https://bots.pepesoft.ru/';
+            }, 3000);
+        }
+
+        // Обработка проигрыша
+        function handleGameOver() {
+            messageElement.innerHTML = '<div class="access-denied">ИГРА ОКОНЧЕНА. Попытки исчерпаны.</div>';
+            startBtn.disabled = true;
+            showSequenceBtn.disabled = true;
+            gameData.lastAttemptTime = new Date().toISOString();
+            updateTimer();
+        }
+
+        // Проверка времени сброса
+        function checkResetTime() {
+            if (gameData.lastAttemptTime) {
+                const currentTime = new Date().getTime();
+                const lastAttemptTime = new Date(gameData.lastAttemptTime).getTime();
+                const timeDiff = currentTime - lastAttemptTime;
+                const resetTimeMs = resetTimeMinutes * 60 * 1000;
+                
+                if (timeDiff > resetTimeMs) {
+                    resetGameData();
+                }
+            }
+        }
+
+        // Сброс игровых данных
+        function resetGameData() {
+            gameData = {
+                level: 1,
+                attempts: maxAttempts,
+                lastAttemptTime: null,
+                gameCompleted: false,
+                currentSequence: [],
+                playerSequence: [],
+                isShowingSequence: false,
+                isPlayerTurn: false
+            };
+            saveGameData();
+            updateUI();
+            startBtn.disabled = false;
+            messageElement.innerHTML = '';
+            sequenceDisplay.innerHTML = '<div class="small-text">Нажмите "Начать игру" чтобы увидеть последовательность</div>';
+        }
+
+        // Сохранение данных игры
+        function saveGameData() {
+            localStorage.setItem('ancientSymbolsGame', JSON.stringify(gameData));
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            attemptsCounter.textContent = `Уровень: ${gameData.level} | Попытки: ${gameData.attempts}`;
+            
+            if (gameData.attempts <= 1) {
+                attemptsCounter.className = 'attempts-counter danger';
+            } else if (gameData.attempts <= 2) {
+                attemptsCounter.className = 'attempts-counter warning';
+            } else {
+                attemptsCounter.className = 'attempts-counter';
+            }
+            
+            showSequenceBtn.disabled = gameData.isShowingSequence || !gameData.currentSequence.length;
+        }
+
+        // Обновление таймера
+        function updateTimer() {
+            if (gameData.lastAttemptTime && gameData.attempts <= 0) {
+                const currentTime = new Date().getTime();
+                const lastAttemptTime = new Date(gameData.lastAttemptTime).getTime();
+                const timeLeft = (resetTimeMinutes * 60 * 1000) - (currentTime - lastAttemptTime);
+                
+                if (timeLeft > 0) {
+                    const minutes = Math.floor(timeLeft / (60 * 1000));
+                    const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+                    timerElement.textContent = `До сброса: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    setTimeout(updateTimer, 1000);
+                } else {
+                    resetGameData();
+                }
+            } else {
+                timerElement.textContent = '';
+            }
+        }
+
+        // Временные сообщения
+        function showTemporaryMessage(text, color) {
+            const tempMessage = document.createElement('div');
+            tempMessage.textContent = text;
+            tempMessage.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: ${color};
+                padding: 10px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 14px;
+                border: 1px solid ${color};
+                box-shadow: 0 0 15px ${color}80;
+            `;
+            
+            document.body.appendChild(tempMessage);
+            
+            setTimeout(() => {
+                if (tempMessage.parentNode) {
+                    document.body.removeChild(tempMessage);
+                }
+            }, 2000);
+        }
+
+        // Обработчики событий
+        startBtn.addEventListener('click', () => {
+            if (!gameData.currentSequence.length || gameData.attempts <= 0) {
+                gameData.level = 1;
+                gameData.attempts = maxAttempts;
+                gameData.currentSequence = generateSequence(3); // Начинаем с 3 символов
+            }
+            showSequence();
+        });
+
+        showSequenceBtn.addEventListener('click', showSequence);
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeSymbols();
+            checkResetTime();
+            updateUI();
+            
+            if (gameData.attempts <= 0) {
+                updateTimer();
+            }
+            
+            if (gameData.gameCompleted) {
+                handleGameComplete();
+            }
+        });
+    </script>
+</body>
+</html>

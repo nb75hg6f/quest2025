@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Головоломка Forbes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Orbitron:wght@400;500&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        * {
+            cursor: none;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Montserrat', serif;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #c0c0c0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Эффект звездного неба */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 4px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 4px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+            z-index: -1;
+        }
+
+        /* Анимированные линии */
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(20, 20, 20, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(20, 20, 20, 0.3) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Кастомный курсор-прицел */
+        .cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+        }
+
+        .cursor::before,
+        .cursor::after {
+            content: '';
+            position: absolute;
+            background: #00ffff;
+            border-radius: 1px;
+        }
+
+        .cursor::before {
+            width: 2px;
+            height: 20px;
+            top: 10px;
+            left: 19px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .cursor::after {
+            width: 20px;
+            height: 2px;
+            top: 19px;
+            left: 10px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .cursor-dot {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: #ff00ff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            box-shadow: 0 0 10px #ff00ff;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: scan 3s linear infinite;
+            opacity: 0.7;
+            z-index: 2;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        /* Контейнер с загадкой */
+        .puzzle-container {
+            width: 90%;
+            max-width: 1200px;
+            padding: 30px;
+            background: rgba(10, 10, 10, 0.7);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 0 30px rgba(100, 0, 255, 0.2),
+                        inset 0 0 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+            margin: 20px 0;
+        }
+
+        .puzzle-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff, #00ccff, #33ff99);
+            border-radius: 17px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(5px);
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+            letter-spacing: 2px;
+            font-size: 2.2em;
+            text-align: center;
+        }
+
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -2px 0 #00ffff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(42px, 9999px, 44px, 0); }
+            5% { clip: rect(12px, 9999px, 59px, 0); }
+            10% { clip: rect(48px, 9999px, 29px, 0); }
+            15% { clip: rect(42px, 9999px, 73px, 0); }
+            20% { clip: rect(63px, 9999px, 27px, 0); }
+            25% { clip: rect(34px, 9999px, 55px, 0); }
+            30% { clip: rect(86px, 9999px, 73px, 0); }
+            35% { clip: rect(20px, 9999px, 20px, 0); }
+            40% { clip: rect(26px, 9999px, 60px, 0); }
+            45% { clip: rect(25px, 9999px, 66px, 0); }
+            50% { clip: rect(57px, 9999px, 98px, 0); }
+            55% { clip: rect(5px, 9999px, 46px, 0); }
+            60% { clip: rect(82px, 9999px, 31px, 0); }
+            65% { clip: rect(54px, 9999px, 27px, 0); }
+            70% { clip: rect(28px, 9999px, 99px, 0); }
+            75% { clip: rect(45px, 9999px, 69px, 0); }
+            80% { clip: rect(23px, 9999px, 85px, 0); }
+            85% { clip: rect(54px, 9999px, 84px, 0); }
+            90% { clip: rect(45px, 9999px, 47px, 0); }
+            95% { clip: rect(37px, 9999px, 20px, 0); }
+            100% { clip: rect(4px, 9999px, 91px, 0); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            5% { clip: rect(52px, 9999px, 74px, 0); }
+            10% { clip: rect(79px, 9999px, 85px, 0); }
+            15% { clip: rect(75px, 9999px, 5px, 0); }
+            20% { clip: rect(67px, 9999px, 61px, 0); }
+            25% { clip: rect(14px, 9999px, 79px, 0); }
+            30% { clip: rect(1px, 9999px, 66px, 0); }
+            35% { clip: rect(86px, 9999px, 30px, 0); }
+            40% { clip: rect(23px, 9999px, 98px, 0); }
+            45% { clip: rect(85px, 9999px, 72px, 0); }
+            50% { clip: rect(71px, 9999px, 75px, 0); }
+            55% { clip: rect(2px, 9999px, 48px, 0); }
+            60% { clip: rect(30px, 9999px, 16px, 0); }
+            65% { clip: rect(59px, 9999px, 50px, 0); }
+            70% { clip: rect(41px, 9999px, 62px, 0); }
+            75% { clip: rect(2px, 9999px, 82px, 0); }
+            80% { clip: rect(47px, 9999px, 73px, 0); }
+            85% { clip: rect(3px, 9999px, 27px, 0); }
+            90% { clip: rect(26px, 9999px, 55px, 0); }
+            95% { clip: rect(42px, 9999px, 97px, 0); }
+            100% { clip: rect(38px, 9999px, 49px, 0); }
+        }
+
+        .description {
+            font-family: 'Montserrat', serif;
+            color: #e0e0e0;
+            line-height: 1.7;
+            font-size: 1.1em;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .hint {
+            font-family: 'Special Elite', cursive;
+            color: #888888;
+            font-size: 0.9em;
+            text-align: center;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        /* Контейнер с вариантами ответов */
+        .answers-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .answer-item {
+            background: rgba(20, 20, 30, 0.5);
+            border-radius: 10px;
+            border: 2px solid rgba(100, 100, 150, 0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            padding: 20px;
+            text-align: center;
+            font-family: 'Montserrat', sans-serif; /* Изменено для русского текста */
+            font-size: 1.1em;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(0, 200, 255, 0.5);
+        }
+
+        .answer-item:hover {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: scale(1.02);
+        }
+
+        .answer-item.selected {
+            border-color: #33ff99;
+            box-shadow: 0 0 20px rgba(51, 255, 153, 0.7);
+            transform: scale(1.03);
+        }
+
+        .answer-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Кнопка проверки */
+        .check-button {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 30px;
+            font-family: 'Montserrat', sans-serif; /* Изменено для русского текста */
+            font-size: 1.1em;
+            background: rgba(0, 30, 50, 0.7);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .check-button:hover {
+            background: rgba(0, 100, 150, 0.7);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+            transform: scale(1.05);
+        }
+
+        .check-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Сообщения */
+        .message {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-family: 'Special Elite', cursive;
+            display: none;
+        }
+
+        .success {
+            background: rgba(0, 50, 0, 0.5);
+            color: #33ff99;
+            border: 1px solid #33ff99;
+            display: block;
+        }
+
+        .error {
+            background: rgba(50, 0, 0, 0.5);
+            color: #ff3333;
+            border: 1px solid #ff3333;
+            display: block;
+        }
+
+        /* Таймер блокировки */
+        .timer-container {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .timer {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.7);
+        }
+
+        /* Прогресс */
+        .progress-container {
+            width: 100%;
+            height: 5px;
+            background: rgba(50, 50, 50, 0.5);
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        /* Анимация появления ответов */
+        @keyframes answerAppear {
+            0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .answer-item {
+            animation: answerAppear 0.5s ease forwards;
+        }
+
+        @media (max-width: 768px) {
+            .answers-container {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-lines"></div>
+    <div class="scan-line"></div>
+    
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <div class="puzzle-container">
+        
+        <div class="description">
+            Если вы состоите в семье Forbes, то какой у вас статус?
+        </div>
+        
+        <div class="hint">
+            Подсказка: Вспомните, что означает принадлежность к элитным кругам
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="timer-container" id="timerContainer">
+            <div class="timer" id="timer">10:00</div>
+            <div class="hint">Попробуйте снова через:</div>
+        </div>
+        
+        <div class="answers-container" id="answersContainer">
+            <!-- Варианты ответов будут добавлены через JavaScript -->
+        </div>
+        
+        <button class="check-button" id="checkButton">Проверить ответ</button>
+        
+        <div class="message success" id="successMessage">
+            Правильно! Ваш статус в семье Forbes - неприкосновенный. Вы обладаете особыми привилегиями и защитой.
+        </div>
+        
+        <div class="message error" id="errorMessage">
+            Неверный ответ. Попробуйте еще раз.
+        </div>
+    </div>
+
+    <script>
+        // Кастомный курсор
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+        });
+
+        // Данные головоломки
+        const answers = [
+            { id: 1, text: "boss", isCorrect: false },
+            { id: 2, text: "неприкосновенный", isCorrect: true },
+            { id: 3, text: "миллиардер", isCorrect: false },
+            { id: 4, text: "лидер", isCorrect: false },
+            { id: 5, text: "владелец", isCorrect: false },
+            { id: 6, text: "наследник", isCorrect: false },
+            { id: 7, text: "инвестор", isCorrect: false },
+            { id: 8, text: "предприниматель", isCorrect: false },
+            { id: 9, text: "филантроп", isCorrect: false },
+            { id: 10, text: "магнат", isCorrect: false },
+            { id: 11, text: "олигарх", isCorrect: false },
+            { id: 12, text: "капитан", isCorrect: false },
+            { id: 13, text: "директор", isCorrect: false },
+            { id: 14, text: "президент", isCorrect: false },
+            { id: 15, text: "глава", isCorrect: false },
+            { id: 16, text: "руководитель", isCorrect: false },
+            { id: 17, text: "основатель", isCorrect: false },
+            { id: 18, text: "вдохновитель", isCorrect: false },
+            { id: 19, text: "идеолог", isCorrect: false },
+            { id: 20, text: "патриарх", isCorrect: false }
+        ];
+        
+        let selectedAnswer = null;
+        let progress = 0;
+        let timerInterval = null;
+        let lockTime = 10 * 60; // 10 минут в секундах
+        let isLocked = false;
+        
+        // Проверка блокировки при загрузке страницы
+        function checkLockStatus() {
+            const lockUntil = localStorage.getItem('forbesLockUntil');
+            if (lockUntil && Date.now() < parseInt(lockUntil)) {
+                // Блокировка активна
+                const remainingTime = Math.ceil((parseInt(lockUntil) - Date.now()) / 1000);
+                startLockTimer(remainingTime);
+            }
+        }
+        
+        // Запуск таймера блокировки
+        function startLockTimer(seconds) {
+            isLocked = true;
+            lockTime = seconds;
+            
+            // Показать таймер
+            document.getElementById('timerContainer').style.display = 'block';
+            document.getElementById('answersContainer').style.opacity = '0.5';
+            document.getElementById('checkButton').disabled = true;
+            
+            // Отключить все ответы
+            document.querySelectorAll('.answer-item').forEach(item => {
+                item.classList.add('disabled');
+            });
+            
+            // Запустить таймер
+            timerInterval = setInterval(() => {
+                lockTime--;
+                updateTimerDisplay();
+                
+                if (lockTime <= 0) {
+                    clearInterval(timerInterval);
+                    unlockInterface();
+                }
+            }, 1000);
+            
+            updateTimerDisplay();
+        }
+        
+        // Обновление отображения таймера
+        function updateTimerDisplay() {
+            const minutes = Math.floor(lockTime / 60);
+            const seconds = lockTime % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Разблокировка интерфейса
+        function unlockInterface() {
+            isLocked = false;
+            document.getElementById('timerContainer').style.display = 'none';
+            document.getElementById('answersContainer').style.opacity = '1';
+            document.getElementById('checkButton').disabled = false;
+            
+            // Включить все ответы
+            document.querySelectorAll('.answer-item').forEach(item => {
+                item.classList.remove('disabled');
+            });
+            
+            // Удалить блокировку из localStorage
+            localStorage.removeItem('forbesLockUntil');
+        }
+        
+        // Блокировка интерфейса на 10 минут
+        function lockInterface() {
+            const lockUntil = Date.now() + (10 * 60 * 1000); // 10 минут
+            localStorage.setItem('forbesLockUntil', lockUntil.toString());
+            startLockTimer(10 * 60);
+        }
+        
+        // Инициализация головоломки
+        function initPuzzle() {
+            const answersContainer = document.getElementById('answersContainer');
+            
+            // Создаем элементы ответов
+            answers.forEach(answer => {
+                const answerElement = document.createElement('div');
+                answerElement.className = 'answer-item';
+                answerElement.dataset.id = answer.id;
+                answerElement.textContent = answer.text;
+                
+                answerElement.addEventListener('click', () => {
+                    if (!isLocked) {
+                        selectAnswer(answer.id);
+                    }
+                });
+                
+                answersContainer.appendChild(answerElement);
+            });
+            
+            // Обновляем прогресс
+            updateProgress();
+        }
+        
+        // Выбор ответа
+        function selectAnswer(answerId) {
+            // Снимаем выделение со всех ответов
+            document.querySelectorAll('.answer-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Выделяем выбранный ответ
+            const selectedElement = document.querySelector(`.answer-item[data-id="${answerId}"]`);
+            selectedElement.classList.add('selected');
+            
+            selectedAnswer = answerId;
+            
+            // Обновляем прогресс
+            updateProgress();
+            
+            // Скрываем сообщения при изменении выбора
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        // Обновление прогресса
+        function updateProgress() {
+            progress = selectedAnswer ? 100 : 0;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            // Активируем кнопку проверки, если ответ выбран
+            document.getElementById('checkButton').disabled = !selectedAnswer || isLocked;
+        }
+        
+        // Проверка выбора
+        function checkSelection() {
+            if (!selectedAnswer || isLocked) return;
+            
+            const selectedAnswerData = answers.find(answer => answer.id === selectedAnswer);
+            const isCorrect = selectedAnswerData.isCorrect;
+            
+            if (isCorrect) {
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('errorMessage').style.display = 'none';
+                
+                // Анимация успеха
+                document.querySelectorAll('.answer-item').forEach(item => {
+                    if (parseInt(item.dataset.id) === selectedAnswer) {
+                        item.style.animation = 'none';
+                        setTimeout(() => {
+                            item.style.animation = 'answerAppear 0.5s ease forwards';
+                        }, 100);
+                    }
+                });
+            } else {
+                document.getElementById('successMessage').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+                
+                // Блокировка интерфейса на 10 минут
+                lockInterface();
+                
+                // Анимация ошибки
+                const selectedElement = document.querySelector(`.answer-item[data-id="${selectedAnswer}"]`);
+                selectedElement.style.borderColor = '#ff3333';
+                selectedElement.style.boxShadow = '0 0 15px rgba(255, 51, 51, 0.7)';
+                
+                setTimeout(() => {
+                    selectedElement.style.borderColor = 'rgba(100, 100, 150, 0.3)';
+                    selectedElement.style.boxShadow = 'none';
+                }, 1000);
+            }
+        }
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            initPuzzle();
+            checkLockStatus();
+            
+            document.getElementById('checkButton').addEventListener('click', checkSelection);
+            
+            // Скрываем сообщения при загрузке
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
