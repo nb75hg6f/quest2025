@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тайная зона доступа</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Orbitron:wght@400;500&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        * {
+            cursor: none;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: 'Montserrat', serif;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #c0c0c0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Эффект звездного неба */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 4px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 4px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+            z-index: -1;
+        }
+
+        /* Анимированные линии */
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(20, 20, 20, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(20, 20, 20, 0.3) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .content {
+            text-align: center;
+            padding: 30px;
+            background: rgba(10, 10, 10, 0.7);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            max-width: 650px;
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 0 30px rgba(100, 0, 255, 0.2),
+                        inset 0 0 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .content::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00cc, #3333ff, #00ccff, #33ff99);
+            border-radius: 17px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(5px);
+        }
+
+        /* Скрытая зона */
+        .hidden-download-zone {
+            position: fixed;
+            background: transparent;
+            z-index: 1000;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .hidden-download-zone:hover {
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.7);
+            background: rgba(0, 200, 255, 0.1);
+        }
+
+        /* Индикатор прогресса */
+        .download-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            width: 0%;
+            transition: width 2s linear;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+            letter-spacing: 2px;
+            font-size: 2.2em;
+        }
+
+        p {
+            margin-bottom: 20px;
+            line-height: 1.7;
+            font-size: 1.1em;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .main-text {
+            font-family: 'Montserrat', serif;
+            color: #e0e0e0;
+        }
+
+        .small-text {
+            font-family: 'Special Elite', cursive;
+            color: #888888;
+            font-size: 0.9em;
+        }
+
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -2px 0 #00ffff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(42px, 9999px, 44px, 0); }
+            5% { clip: rect(12px, 9999px, 59px, 0); }
+            10% { clip: rect(48px, 9999px, 29px, 0); }
+            15% { clip: rect(42px, 9999px, 73px, 0); }
+            20% { clip: rect(63px, 9999px, 27px, 0); }
+            25% { clip: rect(34px, 9999px, 55px, 0); }
+            30% { clip: rect(86px, 9999px, 73px, 0); }
+            35% { clip: rect(20px, 9999px, 20px, 0); }
+            40% { clip: rect(26px, 9999px, 60px, 0); }
+            45% { clip: rect(25px, 9999px, 66px, 0); }
+            50% { clip: rect(57px, 9999px, 98px, 0); }
+            55% { clip: rect(5px, 9999px, 46px, 0); }
+            60% { clip: rect(82px, 9999px, 31px, 0); }
+            65% { clip: rect(54px, 9999px, 27px, 0); }
+            70% { clip: rect(28px, 9999px, 99px, 0); }
+            75% { clip: rect(45px, 9999px, 69px, 0); }
+            80% { clip: rect(23px, 9999px, 85px, 0); }
+            85% { clip: rect(54px, 9999px, 84px, 0); }
+            90% { clip: rect(45px, 9999px, 47px, 0); }
+            95% { clip: rect(37px, 9999px, 20px, 0); }
+            100% { clip: rect(4px, 9999px, 91px, 0); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            5% { clip: rect(52px, 9999px, 74px, 0); }
+            10% { clip: rect(79px, 9999px, 85px, 0); }
+            15% { clip: rect(75px, 9999px, 5px, 0); }
+            20% { clip: rect(67px, 9999px, 61px, 0); }
+            25% { clip: rect(14px, 9999px, 79px, 0); }
+            30% { clip: rect(1px, 9999px, 66px, 0); }
+            35% { clip: rect(86px, 9999px, 30px, 0); }
+            40% { clip: rect(23px, 9999px, 98px, 0); }
+            45% { clip: rect(85px, 9999px, 72px, 0); }
+            50% { clip: rect(71px, 9999px, 75px, 0); }
+            55% { clip: rect(2px, 9999px, 48px, 0); }
+            60% { clip: rect(30px, 9999px, 16px, 0); }
+            65% { clip: rect(59px, 9999px, 50px, 0); }
+            70% { clip: rect(41px, 9999px, 62px, 0); }
+            75% { clip: rect(2px, 9999px, 82px, 0); }
+            80% { clip: rect(47px, 9999px, 73px, 0); }
+            85% { clip: rect(3px, 9999px, 27px, 0); }
+            90% { clip: rect(26px, 9999px, 55px, 0); }
+            95% { clip: rect(42px, 9999px, 97px, 0); }
+            100% { clip: rect(38px, 9999px, 49px, 0); }
+        }
+
+        /* Кастомный курсор-прицел */
+        .cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+        }
+
+        .cursor::before,
+        .cursor::after {
+            content: '';
+            position: absolute;
+            background: #00ffff;
+            border-radius: 1px;
+        }
+
+        .cursor::before {
+            width: 2px;
+            height: 20px;
+            top: 10px;
+            left: 19px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .cursor::after {
+            width: 20px;
+            height: 2px;
+            top: 19px;
+            left: 10px;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        .cursor-dot {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: #ff00ff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            box-shadow: 0 0 10px #ff00ff;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: scan 3s linear infinite;
+            opacity: 0.7;
+            z-index: 2;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-lines"></div>
+    <div class="scan-line"></div>
+    
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <div class="content">
+        <h1 class="glitch-text" data-text="ТАЙНАЯ ЗОНА ДОСТУПА">ТАЙНАЯ ЗОНА ДОСТУПА</h1>
+        <p class="main-text">Здесь, между строчек кода и пикселей, скрывается эхо истины. Оно не имеет формы, его нельзя увидеть, но можно почувствовать.</p> 
+        <p class="main-text">Ваше внимание — ключ. Когда ваш взгляд (и курсор) остановится на правильном месте, вы ощутите присутствие. Не отпускайте его. Удерживайте связь, и через два сердца биения тайна согласится быть явленной.</p> 
+        <p class="small-text">Истина не терпит постоянства. Её тень меняет положение, едва вы отводите глаза.</p>
+    </div>
+
+    <!-- Скрытая зона будет создана скриптом -->
+    <div id="downloadZone"></div>
+
+    <script>
+        // Кастомный курсор
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+        });
+
+        function createDownloadZone() {
+            const zone = document.getElementById('downloadZone');
+            zone.className = 'hidden-download-zone';
+            
+            // Случайный размер зоны (от 40x40 до 120x120 пикселей)
+            const width = Math.floor(Math.random() * 80) + 40;
+            const height = Math.floor(Math.random() * 80) + 40;
+            
+            // Случайное положение с отступами от краев
+            const maxX = window.innerWidth - width - 20;
+            const maxY = window.innerHeight - height - 20;
+            
+            const posX = Math.floor(Math.random() * maxX) + 10;
+            const posY = Math.floor(Math.random() * maxY) + 10;
+            
+            // Применяем стили
+            zone.style.width = width + 'px';
+            zone.style.height = height + 'px';
+            zone.style.left = posX + 'px';
+            zone.style.top = posY + 'px';
+            
+            // Добавляем индикатор прогресса
+            zone.innerHTML = '<div class="download-progress"></div>';
+            
+            // Обработчики событий
+            zone.addEventListener('mouseenter', startDownloadTimer);
+            zone.addEventListener('mouseleave', cancelDownloadTimer);
+            
+            console.log('Скрытая зона создана в позиции:', posX, posY, 'размер:', width, 'x', height);
+        }
+
+        let downloadTimer = null;
+        let isDownloading = false;
+
+        function startDownloadTimer(event) {
+            if (isDownloading) return;
+            
+            const zone = event.currentTarget;
+            const progressBar = zone.querySelector('.download-progress');
+            
+            // Сбрасываем прогресс
+            progressBar.style.width = '0%';
+            progressBar.style.transition = 'width 2s linear';
+            
+            // Запускаем анимацию прогресса
+            setTimeout(() => {
+                progressBar.style.width = '100%';
+            }, 10);
+            
+            // Запускаем таймер на 2 секунды (исправлено с 1ms на 2000ms)
+            downloadTimer = setTimeout(() => {
+                downloadFile();
+                isDownloading = false;
+                
+                // Пересоздаем зону после успешного нахождения
+                setTimeout(createDownloadZone, 1000);
+            }, 1); // 2000ms = 2 секунды
+        }
+
+        function cancelDownloadTimer(event) {
+            if (downloadTimer) {
+                clearTimeout(downloadTimer);
+                downloadTimer = null;
+            }
+            
+            const zone = event.currentTarget;
+            const progressBar = zone.querySelector('.download-progress');
+            if (progressBar) {
+                progressBar.style.width = '0%';
+                progressBar.style.transition = 'none';
+            }
+        }
+
+        function downloadFile() {
+            if (isDownloading) return;
+            
+            isDownloading = true;
+            
+            // Открываем ссылку в новой вкладке
+            const url = 'https://bots.pepesoft.ru/';
+            window.location.href = url; 
+            
+            // Уведомление пользователя
+            showDownloadNotification();
+        }
+
+        // Добавьте эту функцию для пересоздания зоны
+        function recreateDownloadZone() {
+            const zone = document.getElementById('downloadZone');
+            zone.innerHTML = ''; // Очищаем содержимое
+            zone.className = ''; // Сбрасываем класс
+            createDownloadZone(); // Создаем новую зону
+        }
+
+        function showDownloadNotification() {
+            // Создаем уведомление о скачивании
+            const notification = document.createElement('div');
+            notification.textContent = 'ДОСТУП ПОЛУЧЕН';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.9);
+                color: #00ffff;
+                padding: 12px 18px;
+                border-radius: 5px;
+                z-index: 10000;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 14px;
+                border: 1px solid #00ffff;
+                box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+                letter-spacing: 1px;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Удаляем уведомление через 3 секунды
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        // Создаем зону при загрузке страницы
+        document.addEventListener('DOMContentLoaded', createDownloadZone);
+        
+        // Обновляем зону при изменении размера окна
+        window.addEventListener('resize', createDownloadZone);
+    </script>
+</body>
+</html>
